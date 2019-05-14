@@ -178,6 +178,7 @@ public class ComposeMailCc extends Fragment {
 
         if (role.equalsIgnoreCase("3")){
             PrincipalCc.setVisibility(View.INVISIBLE);
+            StudentCc.setVisibility(View.GONE);
         }
 
 

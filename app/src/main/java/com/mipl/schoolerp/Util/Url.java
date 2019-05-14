@@ -6,9 +6,9 @@ import java.util.ArrayList;
 public class Url {
 
 
-    public static  String Base="http://192.168.1.192:2253/WebServiceERpSchool";
+    public static  String Base="http://192.168.1.4:2253/WebServiceERpSchool";
 
-    public static  String IP="http://192.168.1.192:2253";
+    public static  String IP="http://192.168.1.4:2253";
 
     public static  String GetAllTeacher=Base+"/GetAllTeacher";
 
