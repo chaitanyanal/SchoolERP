@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+
+    <color name="CardBackgroundDashboard">#7EC4BD</color>
+    <color name="ChgPassBack">#94BBB6</color>
+    <color name="tab">#4C5352</color>
+    <color name="white">#fff</color>
+    <color name="black">#000</color>
+    <color name="blue">#3E8AC7</color>
+    <color name="cardbackmsg">#9FD0D6</color>
+    <color name="cell">#B4BB6E</color>
+    <color name="cell1">#CFD3AA</color>
+    <color name="red">#C9184C</color>
+    <color name="green">#34E914</color>
+    <color name="weekend">#CDDC39</color>
+    <color name="holiday">#D88368</color>
+    <color name="late_join">#9670DA</color>
+    <color name="outside">#A8A6AA</color>
+    <color name="bounced">#CEA0CA</color>
+    <color name="refund">#5AB1D8</color>
+    <color name="fees">#CA54C0</color>
+
+
+
+
+
+
+</resources>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Fragments.StaffBirthdays">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Staff Birthdays"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:background="@color/cell"
+        android:layout_marginRight="20sp"
+        android:layout_marginLeft="20sp"
+        android:padding="5sp"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <Button
+            android:id="@+id/back"
+            android:gravity="center"
+            android:foregroundGravity="center"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/backwardicon" />
+
+        <TextView
+            android:id="@+id/month"
+            android:layout_width="match_parent"
+            android:layout_height="30sp"
+            android:layout_toLeftOf="@+id/forword"
+            android:layout_toRightOf="@+id/back"
+            android:background="@drawable/card_back"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/forword"
+            android:gravity="center"
+            android:foregroundGravity="center"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/forwardicon" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20sp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:background="@color/cell"
+            android:layout_marginLeft="10dp"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/staffname"
+                android:background="@drawable/cell_shape"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.7"
+                android:textSize="16sp"
+                android:text="Staff Name"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/staffdob"
+                android:background="@drawable/cell_shape"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.3"
+                android:textSize="16sp"
+                android:text="Staff DOB"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/birthdayList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
