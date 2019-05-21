@@ -65,6 +65,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.io.InputStream;
@@ -100,6 +101,11 @@ public class ComposeFragment extends Fragment {
     private Uri filePath, filePath2, filePath3;
     String MessageId;
 
+    String Image1,Image2,Image3;
+
+    Context context;
+
+
     ProgressDialog progressDialog;
 
     public static final String SCHOOL_ERP = "SchoolERP";
@@ -123,6 +129,9 @@ public class ComposeFragment extends Fragment {
 
         sp = getContext().getSharedPreferences(SCHOOL_ERP, Context.MODE_PRIVATE);
         editor = sp.edit();
+
+
+        context=getActivity();
 
         progressDialog=new ProgressDialog(getContext());
 
@@ -170,10 +179,6 @@ public class ComposeFragment extends Fragment {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        /*FragmentManager fm = getActivity().getSupportFragmentManager();
-        for (int i = 2; i < fm.getBackStackEntryCount(); i++) {
-            fm.popBackStack();
-        }*/
 
 
 
@@ -429,21 +434,21 @@ public class ComposeFragment extends Fragment {
                                     progressDialog.setTitle("Submiting..");
                                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                                     progressDialog.show();
-                                    uploadBitmapFirst(imageFirst);
+                                    uploadBitmapFirst(Image1);
                                 }
 
                                 if (!Finename2.getText().toString().isEmpty()) {
                                     progressDialog.setTitle("Submiting..");
                                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                                     progressDialog.show();
-                                    uploadBitmapSecond(imageSecond);
+                                    uploadBitmapSecond(Image2);
                                 }
 
                                 if (!Finename3.getText().toString().isEmpty()) {
                                     progressDialog.setTitle("Submiting..");
                                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                                     progressDialog.show();
-                                    uploadBitmapThird(imageThird);
+                                    uploadBitmapThird(Image3);
                                 }
 
                                 Toast.makeText(getContext(), "" + status, Toast.LENGTH_SHORT).show();
@@ -571,17 +576,25 @@ public class ComposeFragment extends Fragment {
 
         try {
 
-            Intent intent = new Intent();
+           /* Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), chooserFirst);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), chooserFirst);*/
 
 
             /*Intent galleryIntent = new Intent(Intent.ACTION_PICK,
             android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(galleryIntent, chooserFirst);*/
-           /* Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+            /*Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, chooserFirst);*/
+
+
+            String path = Environment.getExternalStorageDirectory() + "/images/imagename.jpg";
+            Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(i, chooserFirst);
+
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -603,8 +616,6 @@ public class ComposeFragment extends Fragment {
         }catch (Exception e){
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -649,10 +660,7 @@ public class ComposeFragment extends Fragment {
                         String mimeType = getContext().getContentResolver().getType(contentURI);
                         Log.d("test", mimeType);
 
-
-                        Bitmap bitmapImage = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), contentURI);
-
-                        Log.d("bitmap", String.valueOf(bitmapImage));
+                        Log.d("uri", String.valueOf(contentURI));
 
 
                         if (mimeType.equalsIgnoreCase("text/plain")) {
@@ -663,7 +671,11 @@ public class ComposeFragment extends Fragment {
 
                             Log.d("pdf name", String.valueOf(filePath));
 
-                            Finename1.setText(String.valueOf(filePath));
+                            String fpath= String.valueOf(filePath);
+
+                            String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".pdf";
+                            Finename1.setText(filename);
+
 
                             First= data.getData().getPath();
 
@@ -689,87 +701,103 @@ public class ComposeFragment extends Fragment {
 
                         } else if (mimeType.equalsIgnoreCase("image/jpg")) {
 
-                            try {
 
-                                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(),contentURI);
+                            filePath = data.getData();
 
-                              //  final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), contentURI);
-
-                             //  final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath);
 
 
-                                Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                if (bitmap.sameAs(emptyBitmap)) {
+                            Log.d("encoded",encodedImage);
 
-                                    imageFirst = bitmap;
+                            Image1=encodedImage;
 
-                                    Uri tempUri = getImageUri(getContext(), bitmap);
-                                    File finalFile = new File(getRealPathFromURI(tempUri));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
-                                    System.out.println(finalFile);
-                                    path = String.valueOf(finalFile);
+                            imageFirst = decodedByte;
 
-                                    Finename1.setText(String.valueOf(finalFile));
-                                }
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
 
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpg";
+                                Finename1.setText(filename);
                             }
+
+
                         } else if (mimeType.equalsIgnoreCase("image/jpeg")) {
 
-                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(),contentURI);
 
-                          //  Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            filePath = data.getData();
 
-                            Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+                            String fpath= String.valueOf(filePath);
 
-                            if (bitmap.sameAs(emptyBitmap)) {
-                                // myBitmap is empty/blank
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                imageFirst = bitmap;
+                            Log.d("encoded",encodedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Image1=encodedImage;
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
-                                Finename1.setText(String.valueOf(finalFile));
+                            imageFirst = decodedByte;
+
+
+                          //  postImage(encodedImage);
+
+
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpeg";
+                                Finename1.setText(String.valueOf(filename));
                             }
 
 
-                            // Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(),contentURI);
-
-                            //  final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), contentURI);
-                            //   final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
 
 
 
                         } else if (mimeType.equalsIgnoreCase("image/png")) {
 
-                            try {
+                            Uri uri=data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            filePath = data.getData();
+                            String fpath= String.valueOf(filePath);
 
-                                Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
 
-                                if (bitmap.sameAs(emptyBitmap)) {
+                            final InputStream imageStream = context.getContentResolver().openInputStream(uri);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                    imageFirst = bitmap;
+                            Log.d("encoded",encodedImage);
 
-                                    Uri tempUri = getImageUri(getContext(), bitmap);
-                                    File finalFile = new File(getRealPathFromURI(tempUri));
+                            Image1=encodedImage;
 
-                                    System.out.println(finalFile);
-                                    path = String.valueOf(finalFile);
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
-                                    Finename1.setText(String.valueOf(finalFile));
-                                }
+                            imageFirst = decodedByte;
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".png";
+                                Finename1.setText(String.valueOf(filename));
                             }
 
                         } else {
@@ -784,41 +812,7 @@ public class ComposeFragment extends Fragment {
                     byte[] byteArray = byteArrayOutputStream.toByteArray();
 
                     path = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-            /*Uri tempUri = getImageUri(getContext(), thumbnail);
-            File finalFile = new File(getRealPathFromURI(tempUri));
-
-            System.out.println(finalFile);
-            path = String.valueOf(finalFile);
-
-            Log.d("ImagePath", path);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageBytes = baos.toByteArray();
-            path = Base64.encodeToString(imageBytes, Base64.DEFAULT);*/
-
                     Log.d("imageString", path);
-
-            /*File file = new File(String.valueOf(new File(path)));
-            if (file.exists()) {
-                file.delete();
-            }
-            try {
-                FileOutputStream out = new FileOutputStream(file);
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                out.flush();
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageBytes = baos.toByteArray();
-            path = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
-            Log.d("imageString", path);*/
-
 
                 }
             } else if (requestCode == 2) {
@@ -840,7 +834,11 @@ public class ComposeFragment extends Fragment {
 
                             Log.d("pdf name", String.valueOf(filePath2));
 
-                            Finename2.setText(String.valueOf(filePath2));
+                            String fpath= String.valueOf(filePath2);
+
+                            String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".pdf";
+
+                            Finename2.setText(filename);
 
                         } else if (mimeType.equalsIgnoreCase("application/vnd.ms-powerpoint")) {
 
@@ -856,63 +854,91 @@ public class ComposeFragment extends Fragment {
 
                         } else if (mimeType.equalsIgnoreCase("image/jpg")) {
 
-                            try {
+                            filePath2 = data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath);
 
-                                imageSecond = bitmap;
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Log.d("encoded",encodedImage);
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            Image2=encodedImage;
 
-                                Finename2.setText(String.valueOf(finalFile));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            imageSecond = decodedByte;
+
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpg";
+                                Finename2.setText(filename);
                             }
+
                         } else if (mimeType.equalsIgnoreCase("image/jpeg")) {
 
-                            try {
+                            filePath2 = data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath2);
 
-                                imageSecond = bitmap;
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Log.d("encoded",encodedImage);
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            Image2=encodedImage;
 
-                                Finename2.setText(String.valueOf(finalFile));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
+                            imageSecond = decodedByte;
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpeg";
+                                Finename2.setText(String.valueOf(filename));
                             }
 
                         } else if (mimeType.equalsIgnoreCase("image/png")) {
 
-                            try {
+                            Uri uri=data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-
-                                imageSecond = bitmap;
-
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
-
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
-
-                                Finename2.setText(String.valueOf(finalFile));
+                            filePath2 = data.getData();
+                            String fpath= String.valueOf(filePath2);
 
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            final InputStream imageStream = context.getContentResolver().openInputStream(uri);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
+
+                            Log.d("encoded",encodedImage);
+
+                            Image2=encodedImage;
+
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
+
+                            imageSecond = decodedByte;
+
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".png";
+                                Finename2.setText(String.valueOf(filename));
                             }
                         } else {
                             Toast.makeText(getContext(), "Not Supported File Format...", Toast.LENGTH_SHORT).show();
@@ -935,10 +961,12 @@ public class ComposeFragment extends Fragment {
                         } else if (mimeType.equalsIgnoreCase("application/pdf")) {
 
                             filePath3 = data.getData();
-
                             Log.d("pdf name", String.valueOf(filePath3));
 
-                            Finename3.setText(String.valueOf(filePath3));
+                            String fpath= String.valueOf(filePath3);
+                            String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".pdf";
+
+                            Finename3.setText(filename);
 
                         } else if (mimeType.equalsIgnoreCase("application/vnd.ms-powerpoint")) {
 
@@ -954,65 +982,92 @@ public class ComposeFragment extends Fragment {
 
                         } else if (mimeType.equalsIgnoreCase("image/jpg")) {
 
-                            try {
+                            filePath3 = data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath3);
 
-                                imageThird = bitmap;
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Log.d("encoded",encodedImage);
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            Image3=encodedImage;
 
-                                Finename3.setText(String.valueOf(finalFile));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
+                            imageThird = decodedByte;
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpg";
+                                Finename3.setText(filename);
                             }
+
                         } else if (mimeType.equalsIgnoreCase("image/jpeg")) {
 
-                            try {
+                            filePath3 = data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath3);
 
-                                imageThird = bitmap;
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Log.d("encoded",encodedImage);
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            Image3=encodedImage;
 
-                                Finename3.setText(String.valueOf(finalFile));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
+                            imageThird = decodedByte;
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".jpeg";
+                                Finename3.setText(String.valueOf(filename));
                             }
+
 
                         } else if (mimeType.equalsIgnoreCase("image/png")) {
 
-                            try {
+                            filePath3 = data.getData();
 
-                                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                            String fpath= String.valueOf(filePath3);
 
-                                imageThird = bitmap;
+                            final InputStream imageStream = context.getContentResolver().openInputStream(contentURI);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            String encodedImage = encodeImage(selectedImage);
 
-                                Uri tempUri = getImageUri(getContext(), bitmap);
-                                File finalFile = new File(getRealPathFromURI(tempUri));
+                            Log.d("encoded",encodedImage);
 
-                                System.out.println(finalFile);
-                                path = String.valueOf(finalFile);
+                            Image3=encodedImage;
 
-                                Finename3.setText(String.valueOf(finalFile));
+                            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            Log.d("decodedByte", String.valueOf(decodedByte));
 
+                            imageThird = decodedByte;
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            Bitmap emptyBitmap = Bitmap.createBitmap(decodedByte.getWidth(), decodedByte.getHeight(), decodedByte.getConfig());
+
+                            if (decodedByte.sameAs(emptyBitmap)) {
+                                Log.d("empty","empty");
+                            }else {
+                                String filename=fpath.substring(fpath.lastIndexOf("/")+1)+".png";
+                                Finename3.setText(String.valueOf(filename));
                             }
+
                         } else {
                             Toast.makeText(getContext(), "Not Supported File Format...", Toast.LENGTH_SHORT).show();
                         }
@@ -1023,6 +1078,8 @@ public class ComposeFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
+
 
     public String getRealPathFromURI(Uri uri) {
         String path = "";
@@ -1100,11 +1157,11 @@ public class ComposeFragment extends Fragment {
                 String uploadId = UUID.randomUUID().toString();
 
                 new MultipartUploadRequest(getContext(), uploadId, Url.Attachment1)
-                        .addFileToUpload(path, "file") //Adding file
+                        .addFileToUpload(path, "fileDiff") //Adding file
                         .addParameter("Userid", Uid)
                         .addParameter("msgId", MessageId)
                         .addParameter("Role", role)
-                        .setNotificationConfig(new UploadNotificationConfig())
+                        .addParameter("fileNm", "test")
                         .setMaxRetries(5)
                         .startUpload(); //Starting the upload
 
@@ -1120,11 +1177,12 @@ public class ComposeFragment extends Fragment {
                 String uploadId = UUID.randomUUID().toString();
 
                 new MultipartUploadRequest(getContext(), uploadId, Url.Attachment2)
-                        .addFileToUpload(path1, "file") //Adding file
+                        .addFileToUpload(path1, "fileDiff") //Adding file
                         .addParameter("Userid", Uid)
                         .addParameter("msgId", MessageId)
                         .addParameter("Role", role)
-                        .setNotificationConfig(new UploadNotificationConfig())
+                        .addParameter("fileNm", "test")
+                       // .setNotificationConfig(new UploadNotificationConfig())
                         .setMaxRetries(5)
                         .startUpload(); //Starting the upload
 
@@ -1140,11 +1198,12 @@ public class ComposeFragment extends Fragment {
                 String uploadId = UUID.randomUUID().toString();
 
                 new MultipartUploadRequest(getContext(), uploadId, Url.Attachment3)
-                        .addFileToUpload(path2, "file") //Adding file
+                        .addFileToUpload(path2, "fileDiff") //Adding file
                         .addParameter("Userid", Uid)
                         .addParameter("msgId", MessageId)
                         .addParameter("Role", role)
-                        .setNotificationConfig(new UploadNotificationConfig())
+                        .addParameter("fileNm", "test")
+                       // .setNotificationConfig(new UploadNotificationConfig())
                         .setMaxRetries(5)
                         .startUpload(); //Starting the upload
 
@@ -1157,9 +1216,9 @@ public class ComposeFragment extends Fragment {
 
 
 
-    private void uploadBitmapFirst(final Bitmap bitmap) {
+    private void uploadBitmapFirst(final String imagePath) {
 
-        if (bitmap!=null){
+        if (imagePath!=null){
 
             final String Uid;
 
@@ -1170,7 +1229,7 @@ public class ComposeFragment extends Fragment {
             }
 
             //our custom volley request
-            VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, Url.Attachment1,
+           /* VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, Url.Attachment1,
                     new Response.Listener<NetworkResponse>() {
                         @Override
                         public void onResponse(NetworkResponse response) {
@@ -1205,6 +1264,7 @@ public class ComposeFragment extends Fragment {
                     params.put("Userid", Uid);
                     params.put("msgId", MessageId);
                     params.put("Role", role);
+                    params.put("file", bitmap);
                     return params;
                 }
 
@@ -1212,19 +1272,54 @@ public class ComposeFragment extends Fragment {
                 protected Map<String, DataPart> getByteData() {
                     Map<String, DataPart> params = new HashMap<>();
                     long imagename = System.currentTimeMillis();
-                    params.put("file", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
+                  //  params.put("file", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
                     return params;
                 }
             };
 
             //adding the request to volley
-            Volley.newRequestQueue(getContext()).add(volleyMultipartRequest);
+            Volley.newRequestQueue(getContext()).add(volleyMultipartRequest);*/
+
+
+           Map<String,String> params=new HashMap<>();
+           params.put("Userid",Uid);
+           params.put("msgId", MessageId);
+           params.put("Role", role);
+           params.put("file", imagePath);
+           params.put("fileNm", Finename1.getText().toString());
+
+
+
+            CustomRequest jsonObjRequest = new CustomRequest(Request.Method.POST, Url.Attachment1, params, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+
+                    Log.d("res", response.toString());
+
+                    try {
+                        String status = response.getString("status");
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getContext(), "Server Error...", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                }
+            });
+
+            AppController.getInstance().addToRequestQueue(jsonObjRequest);
+
         }
     }
 
-    private void uploadBitmapSecond(final Bitmap bitmap) {
+    private void uploadBitmapSecond(final String imagePath1) {
 
-        if (bitmap!=null){
+        if (imagePath1!=null){
 
             final String Uid;
 
@@ -1234,66 +1329,47 @@ public class ComposeFragment extends Fragment {
                 Uid = UserId;
             }
 
-            //our custom volley request
-            VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, Url.Attachment2,
-                    new Response.Listener<NetworkResponse>() {
-                        @Override
-                        public void onResponse(NetworkResponse response) {
+            Map<String,String> params=new HashMap<>();
+            params.put("Userid",Uid);
+            params.put("msgId", MessageId);
+            params.put("Role", role);
+            params.put("file", imagePath1);
+            params.put("fileNm", Finename1.getText().toString());
 
-                            try {
 
-                                progressDialog.dismiss();
-                                progressDialog.hide();
 
-                                JSONObject obj = new JSONObject(new String(response.data));
-                                Log.d("response", String.valueOf(obj));
-
-                                String success = obj.getString("status");
-
-                                Log.d("success", success);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            //  Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.d("status",error.getMessage());
-                        }
-                    }) {
-
+            CustomRequest jsonObjRequest = new CustomRequest(Request.Method.POST, Url.Attachment2, params, new Response.Listener<JSONObject>() {
                 @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("Userid", Uid);
-                    params.put("msgId", MessageId);
-                    params.put("Role", role);
-                    return params;
-                }
+                public void onResponse(JSONObject response) {
 
+                    Log.d("res", response.toString());
+
+                    try {
+                        String status = response.getString("status");
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
                 @Override
-                protected Map<String, DataPart> getByteData() {
-                    Map<String, DataPart> params = new HashMap<>();
-                    long imagename = System.currentTimeMillis();
-                    params.put("file", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
-                    return params;
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getContext(), "Server Error...", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
                 }
-            };
+            });
 
-            //adding the request to volley
-            Volley.newRequestQueue(getContext()).add(volleyMultipartRequest);
+            AppController.getInstance().addToRequestQueue(jsonObjRequest);
         }
 
 
     }
 
-    private void uploadBitmapThird(final Bitmap bitmap) {
+    private void uploadBitmapThird(final String imagePath2) {
 
 
-        if (bitmap!=null){
+        if (imagePath2!=null){
 
             final String Uid;
 
@@ -1304,55 +1380,39 @@ public class ComposeFragment extends Fragment {
             }
 
             //our custom volley request
-            VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, Url.Attachment3,
-                    new Response.Listener<NetworkResponse>() {
-                        @Override
-                        public void onResponse(NetworkResponse response) {
+            Map<String,String> params=new HashMap<>();
+            params.put("Userid",Uid);
+            params.put("msgId", MessageId);
+            params.put("Role", role);
+            params.put("file", imagePath2);
+            params.put("fileNm", Finename1.getText().toString());
 
-                            try {
 
-                                progressDialog.dismiss();
-                                progressDialog.hide();
 
-                                JSONObject obj = new JSONObject(new String(response.data));
-                                Log.d("response", String.valueOf(obj));
-
-                                String success = obj.getString("status");
-
-                                Log.d("success", success);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            //  Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }) {
-
+            CustomRequest jsonObjRequest = new CustomRequest(Request.Method.POST, Url.Attachment3, params, new Response.Listener<JSONObject>() {
                 @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("Userid", Uid);
-                    params.put("msgId", MessageId);
-                    params.put("Role", role);
-                    return params;
-                }
+                public void onResponse(JSONObject response) {
 
+                    Log.d("res", response.toString());
+
+                    try {
+                        String status = response.getString("status");
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
                 @Override
-                protected Map<String, DataPart> getByteData() {
-                    Map<String, DataPart> params = new HashMap<>();
-                    long imagename = System.currentTimeMillis();
-                    params.put("file", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
-                    return params;
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getContext(), "Server Error...", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
                 }
-            };
+            });
 
-            //adding the request to volley
-            Volley.newRequestQueue(getContext()).add(volleyMultipartRequest);
+            AppController.getInstance().addToRequestQueue(jsonObjRequest);
+
         }
     }
 
@@ -1492,42 +1552,83 @@ public class ComposeFragment extends Fragment {
 
 
 
-
-
-    public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException {
-
-        double THUMBNAIL_SIZE=10245.00;
-
-        InputStream input = getContext().getContentResolver().openInputStream(uri);
-
-        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
-        onlyBoundsOptions.inJustDecodeBounds = true;
-        onlyBoundsOptions.inDither=true;//optional
-        onlyBoundsOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//optional
-        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
-        input.close();
-        if ((onlyBoundsOptions.outWidth == -1) || (onlyBoundsOptions.outHeight == -1))
-            return null;
-
-        int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
-
-        double ratio = (originalSize > THUMBNAIL_SIZE) ? (originalSize / THUMBNAIL_SIZE) : 1.0;
-
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);
-        bitmapOptions.inDither=true;//optional
-        bitmapOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//optional
-        input = getContext().getContentResolver().openInputStream(uri);
-        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
-        input.close();
-        return bitmap;
+    public String getPath1(Uri uri) {
+        Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
-    private static int getPowerOfTwoForSampleRatio(double ratio){
-        int k = Integer.highestOneBit((int)Math.floor(ratio));
-        if(k==0) return 1;
-        else return k;
+    public static Bitmap decodeSampledBitmapFromResource(String resId, int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(resId, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(resId, options);
     }
 
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+// Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 2;
+
+        if (height > reqHeight || width > reqWidth) {
+            if (width > height) {
+                inSampleSize = Math.round((float) height / (float) reqHeight);
+            } else {
+                inSampleSize = Math.round((float) width / (float) reqWidth);
+            }
+        }
+        return inSampleSize;
+    }
+
+
+
+
+
+
+
+
+
+    private String encodeImage(Bitmap bm) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG,80,baos);
+        byte[] b = baos.toByteArray();
+        String encImage = Base64.encodeToString(b, Base64.DEFAULT);
+        return encImage;
+    }
+
+
+    private void postImage(String encodedImage) {
+
+        HashMap<String,String> params=new HashMap<>();
+        params.put("image",encodedImage);
+
+
+        CustomRequest jsonObjRequest = new CustomRequest(Request.Method.POST, "http://192.168.1.192:2253/WebServiceERpSchool/TestBase64Image", params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+                Log.d("res", response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getContext(), "Server Error...", Toast.LENGTH_SHORT).show();
+                error.printStackTrace();
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(jsonObjRequest);
+
+    }
 
 }

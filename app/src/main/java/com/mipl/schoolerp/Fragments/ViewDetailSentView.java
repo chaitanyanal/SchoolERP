@@ -174,18 +174,33 @@ public class ViewDetailSentView extends Fragment {
         DownloadManager mgr = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
 
         Uri downloadUri = Uri.parse(uRl);
-        DownloadManager.Request request = new DownloadManager.Request(downloadUri);
 
-        request.setAllowedNetworkTypes(
-                DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false).setTitle("Demo")
-                .setDescription("Something useful. No, really.")
-                .setDestinationInExternalPublicDir("/ERP", file);
+        String url= String.valueOf(downloadUri);
 
-        mgr.enqueue(request);
+        boolean bResponse = exists(url);
+
+        if (bResponse==true) {
+            DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+
+            request.setAllowedNetworkTypes(
+                    DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                    .setAllowedOverRoaming(false).setTitle("Demo")
+                    .setDescription("Something useful. No, really.")
+                    .setDestinationInExternalPublicDir("/ERP", file);
+
+            mgr.enqueue(request);
+
+            Toast.makeText(getActivity(), "Downloading...",Toast.LENGTH_LONG).show();
+        }
+        else {
+            Toast.makeText(getContext(), "File does not exist!", Toast.LENGTH_SHORT).show();
+        }
+
+
+
 
         // Open Download Manager to view File progress
-        Toast.makeText(getActivity(), "Downloading...",Toast.LENGTH_LONG).show();
+
       //  startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
 
     }
@@ -212,6 +227,20 @@ public class ViewDetailSentView extends Fragment {
         });
 
         AppController.getInstance().addToRequestQueue(jsonObjRequest);
+    }
+
+
+    public static boolean exists(String URLName){
+        try {
+            HttpURLConnection.setFollowRedirects(false);
+            HttpURLConnection con =  (HttpURLConnection) new URL(URLName).openConnection();
+            con.setRequestMethod("HEAD");
+            return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }
