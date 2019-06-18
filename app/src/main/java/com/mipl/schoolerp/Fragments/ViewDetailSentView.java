@@ -3,11 +3,15 @@ package com.mipl.schoolerp.Fragments;
 
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -15,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,10 +56,21 @@ import static com.mipl.schoolerp.Util.Url.Attachment1;
  */
 public class ViewDetailSentView extends Fragment {
 
+    LinearLayout linearLayout;
+
     TextView subject,date,ToName,msgBody,txtfilename1,txtfilename2,txtfilename3;
     TextView view1,view2,view3;
 
     String Attach1,Attach2,Attach3,MsgId,File1,File2,File3;
+
+    ImageView replySent;
+
+    String LoginName,UserId,mainRoll;
+
+
+    public static final String SCHOOL_ERP = "SchoolERP";
+    SharedPreferences sp;
+    SharedPreferences.Editor editor;
 
     public ViewDetailSentView() {
         // Required empty public constructor
@@ -62,15 +78,36 @@ public class ViewDetailSentView extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_view_detail_sent_view, container, false);
+
+
+        sp = getContext().getSharedPreferences(SCHOOL_ERP, Context.MODE_PRIVATE);
+        editor = sp.edit();
+
+
+        LoginName=sp.getString("name","");
+        UserId=sp.getString("Userid","");
+        mainRoll=sp.getString("role","");
+
+
+
+
 
         subject=view.findViewById(R.id.subjectSent);
         date=view.findViewById(R.id.dateSent);
         ToName=view.findViewById(R.id.ToNameSent);
         msgBody=view.findViewById(R.id.msgBodySent);
+        replySent=view.findViewById(R.id.ReplySent);
+
+        linearLayout=view.findViewById(R.id.LL1);
+
+        if (LoginName.equalsIgnoreCase("Admin")){
+            linearLayout.setVisibility(View.VISIBLE);
+        }else {
+            linearLayout.setVisibility(View.GONE);
+        }
 
         view1=view.findViewById(R.id.view1);
         view2=view.findViewById(R.id.view2);
@@ -109,7 +146,6 @@ public class ViewDetailSentView extends Fragment {
 
         if (!File1.equalsIgnoreCase("null")){
             txtfilename1.setText(File1);
-           // txtfilename1.setMovementMethod(LinkMovementMethod.getInstance());
             view1.setVisibility(View.VISIBLE);
         }else {
             view1.setVisibility(View.GONE);
@@ -157,6 +193,34 @@ public class ViewDetailSentView extends Fragment {
                 downloadFile(Url.IP + Attach3,File3);
             }
         });
+
+
+
+
+
+        replySent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Bundle bundle=new Bundle();
+                bundle.putString("To",from);
+                bundle.putString("Subject",Subject);
+
+
+
+                Fragment fragment = new ReplyMailFragment();
+                fragment.setArguments(bundle);
+                FragmentManager fragmentManager = ((AppCompatActivity)getContext()).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+
+            }
+        });
+
+
+
 
         sendNotification();
 

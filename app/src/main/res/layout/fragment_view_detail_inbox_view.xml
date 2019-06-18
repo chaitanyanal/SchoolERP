@@ -209,8 +209,9 @@
 
 
                 <ImageView
+                    android:id="@+id/Reply"
                     android:layout_width="20sp"
-                    android:layout_height="20sp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/ic_reply_black" />
 
                 <TextView

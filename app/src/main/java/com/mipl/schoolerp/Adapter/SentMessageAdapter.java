@@ -13,8 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.mipl.schoolerp.Fragments.ViewDetailInboxView;
 import com.mipl.schoolerp.Fragments.ViewDetailSentView;
 import com.mipl.schoolerp.Model.SentViewModel;
 import com.mipl.schoolerp.R;

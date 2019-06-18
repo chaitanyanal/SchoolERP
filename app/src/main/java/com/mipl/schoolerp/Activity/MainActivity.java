@@ -109,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         permissions();
 
-
         sp = getApplicationContext().getSharedPreferences(SCHOOL_ERP, Context.MODE_PRIVATE);
         editor = sp.edit();
 

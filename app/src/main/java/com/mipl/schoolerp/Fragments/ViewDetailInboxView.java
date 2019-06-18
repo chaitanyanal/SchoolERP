@@ -7,10 +7,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,14 +34,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created By Chaitanya.
  */
+
 public class ViewDetailInboxView extends Fragment {
 
     TextView subject,date,fromName,msgBody,attachments,attachment1,attachment2,attachment3;
     LinearLayout view1,view2,view3;
 
     String Attach1,Attach2,Attach3,MsgId,File1,File2,File3;
+    ImageView Reply;
 
     public ViewDetailInboxView() {
         // Required empty public constructor
@@ -70,6 +76,8 @@ public class ViewDetailInboxView extends Fragment {
         fromName=view.findViewById(R.id.fromName);
         msgBody=view.findViewById(R.id.msgBody);
         attachments=view.findViewById(R.id.attachments);
+
+        Reply=view.findViewById(R.id.Reply);
 
         view1=view.findViewById(R.id.view1);
         view2=view.findViewById(R.id.view2);
@@ -132,6 +140,18 @@ public class ViewDetailInboxView extends Fragment {
 
 
 
+        Reply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+
+            }
+        });
+
+
+
 
         sendNotification();
 
@@ -164,6 +184,7 @@ public class ViewDetailInboxView extends Fragment {
     }
 
     public void downloadFile(String uRl,String file) {
+
         File direct = new File(Environment.getExternalStorageDirectory() + "/ERP");
 
         if (!direct.exists()) {
